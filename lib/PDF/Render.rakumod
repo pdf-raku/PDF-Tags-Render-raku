@@ -107,7 +107,7 @@ method !paginate(
     }
 }
 
-method merge-batch( % ( :@toc!, :%index!, :$frag, :%info (:$lang, *%meta), :$pages ) ) {
+method merge-batch( % ( :@toc!, :%index!, :$frag, :%info (:$Lang, *%meta), :$pages ) ) {
     @.toc.append: @toc;
     %.index ,= %index;
     with $frag {
@@ -115,12 +115,14 @@ method merge-batch( % ( :@toc!, :%index!, :$frag, :%info (:$lang, *%meta), :$pag
             $.root.add-kid: :$node;
         }
     }
-    $!pdf.Lang //= $_ with $lang;
+    with $Lang {
+        $!pdf.catalog.Lang //= $_;
+        $!root.Lang //= $_;
+    }
+
     if %meta {
         my $pdf-info = ($!pdf.Info //= {});
-        for %meta.pairs {
-            $pdf-info{.key.tclc} //= .value;
-        }
+        $pdf-info{.key} = .value for %meta.pairs;
     }
 }
 

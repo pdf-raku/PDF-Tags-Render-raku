@@ -70,10 +70,10 @@ has Bool $!float;
 
 class DefaultLinker {
     method extension { 'pdf' }
-    method resolve-link(Str $link) {
+    method resolve-link(Str:D $link) {
         if IETF::RFC_Grammar::URI.parse($link) {
             my URI() $uri = $link;
-            if $uri.is-relative && $uri.path.segments.tail && ! $uri.path.segments.tail.contains('.') {
+            if $uri.is-relative && $uri.path.segments && ! $uri.path.segments.tail.contains('.') {
                 $uri.path($uri.path ~ '.' ~ $.extension);
             }
             $uri.Str;
@@ -85,24 +85,18 @@ class DefaultLinker {
 }
 has $.linker = DefaultLinker;
 
-method process-root(:@Document!) {
-    my :(@content, %info) := @Document.&get-content;
-    $!pdf.Root<Lang> = $_ with %info<lang>:delete;
-    if %info {
-        my $Info = $!pdf.Info //= {};
-        $Info{.key.tclc} = .value for %info.sort;
-    }
-    @content;
-}
-
-method write-batch($ast, PDF::Tags::Elem $*root) {
+method write-batch(@ast, PDF::Tags::Elem $*root) {
     my $*tag = $*root;
     my CSS::Properties $style = $*tag.style;
     $!styler .= new: :$style;
     my $note-style = $*tag.root.styler.tag-style(FENote);
     $!footer-style .= new: :style($note-style), :lines-before(0);
-    self.ast2pdf($ast);
+
+    my :(@content, %info) := @ast.&get-content;
+    self.ast2pdf(@content);
     self!finish-page;
+
+    %info;
 }
 
 submethod TWEAK(Numeric:D :$margin = 20) {
@@ -112,13 +106,14 @@ submethod TWEAK(Numeric:D :$margin = 20) {
     $!margin-right  //= $margin;
 }
 
-method !tag-begin($name is copy, :$role, *%atts) {
+method !tag-begin($name is copy, :$role, :$Lang, *%atts) {
     if $!tag {
         if $role {
             $*tag.root.set-role($role => $name);
             $name = $role;
         }
         $*tag .= add-kid: :$name;
+        $*tag.Lang = $_ with $Lang;
         $*tag.set-attributes: |%atts if %atts;
         @!tags.push: $*tag;
     }
@@ -131,8 +126,8 @@ method !tag-end {
     }
 }
 
-method !tag($tag, &codez) {
-    self!tag-begin($tag);
+method !tag($tag, &codez, *%atts) {
+    self!tag-begin($tag, |%atts);
     self!gfx.&codez();
     self!tag-end;
 }
@@ -276,9 +271,9 @@ method !build-table(@content) {
 
     my $cols = @table.max: *.elems;
     my @widths = (^$cols).map: -> $col {
-        @table.map({
+        max @table.map: {
             do with .[$col] { with .value { .width }  } // 0
-        }).max
+        }
     }
     @table, @widths;
 }
@@ -295,17 +290,6 @@ method !deref(@content, Str:D $tag, Bool :$consume) {
         @content = [];
     }
     $rv;
-}
-
-multi method ast2pdf('Document', @content, :$Lang, *%info) {
-    $!pdf.Root<Lang> = $_ with $Lang;
-    if %info {
-        my $info = $!pdf.Info //= {};
-        $info{.key} = .value for %info;
-    }
-    self!tag: Document, {
-        $.ast2pdf: @content;
-    }
 }
 
 multi method ast2pdf('Table', @content, *%atts) {
@@ -505,22 +489,24 @@ multi method ast2pdf(Str:D $role where {%!role-map{$_}:exists}, @content is copy
     $.ast2pdf: $tag, @content, :$role, |%atts;
 }
 
+my subset HeaderTag of Str where /^H(\d*)|Title$/;
+
+multi method ast2pdf(HeaderTag:D $tag, @content, *%atts) {
+    self!style: :$tag, :%atts, {
+        my Int() $level = ($0//'').Str || 1;
+        self!heading(@content, :$level);
+    }
+}
+
+# vanilla tag
 multi method ast2pdf(Str:D $tag, @content, *%atts) {
     self!style: :$tag, :%atts, {
-        if $tag ~~ /^H(\d*)|Title$/ {
-            # header
-            my Int() $level = ($0//'').Str || 1;
-            self!heading(@content, :$level);
-        }
-        else {
-            # vanilla tag
-            self.ast2pdf: @content;
-        }
+        self.ast2pdf: @content;
     }
 }
 
 sub get-content(@content is copy) {
-    my subset AttContent of Pair where .value !~~ List;
+    my subset AttContent of Pair where !.value.isa(List);
     my %atts;
 
     while @content.head ~~ AttContent {
