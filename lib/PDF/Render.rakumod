@@ -16,6 +16,8 @@ use CSS::Stylesheet;
 use PDF::Action;
 use PDF::StructElem;
 
+my subset PdfASTRoot is export(:PDFASTRoot) of Pair:D where .key ~~ 'Document' && .value.isa(List);
+
 ### Attributes ###
 has PDF::API6 $.pdf .= new;
 has CSS::TagSet::TaggedPDF $.styler .= new;
@@ -166,13 +168,12 @@ multi method render(::?CLASS:U: Pair:D $xml-ast, |c) {
 }
 
 multi method render(::?CLASS:D: XMLish:D $xml, |c) { self.render($xml.ast, |c) }
-multi method render(::?CLASS:D: Pair:D $xml-ast, Bool :$index = True) {
+multi method render(::?CLASS:D: PdfASTRoot $xml-ast, Bool :$index = True) {
     my PDF::Render::Tree $writer = self.writer;
-    my Pair:D @content = $writer.process-root(|$xml-ast);
-    $writer.write-batch(@content, $!root);
+    my Hash:D $info = $writer.write-batch($xml-ast.value, $!root);
     my %index = $writer.index;
     my @toc = $writer.toc;
-    $.merge-batch: %( :@toc, :%index, );
+    $.merge-batch: %( :@toc, :%index, :$info);
     $.build-index if $index && %index;
     $.pdf;
 }

@@ -341,11 +341,9 @@ method !make-link(Str:D $url) {
 multi method ast2pdf('Code', @content, *%atts where .<Placement> ~~ 'Block') {
     self!style: :indent, :tag(CODE), :lines-before(3), :%atts, {
         self!pad-here;
-        self.say;
         $!code-start-y //= $!ty;
         self.ast2pdf: @content;
         self!finish-code;
-        self.say;
     }
 }
 
