@@ -20,7 +20,7 @@
     "PDF::Tags::Render": "lib/PDF/Tags/Render.rakumod",
     "PDF::Tags::Render::Outlines": "lib/PDF/Tags/Render/Outlines.rakumod",
     "PDF::Tags::Render::Style": "lib/PDF/Tags/Render/Style.rakumod",
-    "PDF::Tags::Render::Tree": "lib/PDF/Tags/Render/Tree.rakumod"
+    "PDF::Tags::Render::Writer": "lib/PDF/Tags/Render/Writer.rakumod"
   },
   "resources": [
   ],

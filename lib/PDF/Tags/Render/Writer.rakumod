@@ -1,4 +1,4 @@
-unit class PDF::Tags::Render::Tree;
+unit class PDF::Tags::Render::Writer;
 
 use PDF::Tags::Render::Outlines :Level;
 also does PDF::Tags::Render::Outlines;

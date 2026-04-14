@@ -9,7 +9,7 @@ use PDF::Tags::Elem;
 use PDF::Tags::Node;
 use PDF::Content;
 use PDF::Tags::Render::Style;
-use PDF::Tags::Render::Tree;
+use PDF::Tags::Render::Writer;
 use CSS::TagSet::TaggedPDF;
 use CSS::Stylesheet;
 # PDF::Class
@@ -82,7 +82,7 @@ submethod TWEAK(Str:D :$lang = 'en', :$pod, :@fonts, :$stylesheet, :$page-style,
 method writer(PDF::Content::PageTree:D :$pages = $!pdf.Pages, PDF::Tags::Elem:D :$frag = $!root.Document) {
     $pages.media-box = 0, 0, $!width, $!height;
     my $finish = ! $!page-numbers;
-    my PDF::Tags::Render::Tree $writer .= new: :%!font-map, :%!role-map, :$pages, :$finish, :$!tag, :$!pdf, :$!contents; #, |c;
+    my PDF::Tags::Render::Writer $writer .= new: :%!font-map, :%!role-map, :$pages, :$finish, :$!tag, :$!pdf, :$!contents; #, |c;
 }
 
 method !paginate(
@@ -169,7 +169,7 @@ multi method render(::?CLASS:U: Pair:D $xml-ast, |c) {
 
 multi method render(::?CLASS:D: XMLish:D $xml, |c) { self.render($xml.ast, |c) }
 multi method render(::?CLASS:D: PdfASTRoot $xml-ast, Bool :$index = True) {
-    my PDF::Tags::Render::Tree $writer = self.writer;
+    my PDF::Tags::Render::Writer $writer = self.writer;
     my Hash:D $info = $writer.write-batch($xml-ast.value, $!root);
     my %index = $writer.index;
     my @toc = $writer.toc;
