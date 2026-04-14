@@ -1,10 +1,10 @@
-unit class PDF::Render::Tree;
+unit class PDF::Tags::Render::Tree;
 
-use PDF::Render::Outlines :Level;
-also does PDF::Render::Outlines;
+use PDF::Tags::Render::Outlines :Level;
+also does PDF::Tags::Render::Outlines;
 
 use PDF::API6;
-use PDF::Render::Style;
+use PDF::Tags::Render::Style;
 
 use PDF::Content::Color :&color;
 use PDF::Content::FontObj;
@@ -57,8 +57,8 @@ my class PageFootNote {
 has PageFootNote:D @!footnotes;
 
 ### Rendering State ###
-has PDF::Render::Style $.styler handles<style font-size leading line-height bold italic mono underline lines-before link verbatim>;
-has PDF::Render::Style $!footer-style;
+has PDF::Tags::Render::Style $.styler handles<style font-size leading line-height bold italic mono underline lines-before link verbatim>;
+has PDF::Tags::Render::Style $!footer-style;
 has $!tx = $!margin-left; # text-flow x
 has $!ty; # text-flow y
 has Numeric $!indent = 0.0;
@@ -243,7 +243,6 @@ method !add-row(@table, @tr) {
 }
 
 method !build-table(@content) {
-    my $x0 = self!indent;
     my @table = ();
 
     if self!deref(@content, TableHead) -> (@thead, %atts) {

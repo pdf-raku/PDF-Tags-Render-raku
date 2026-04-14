@@ -1,5 +1,5 @@
 use Test;
-use PDF::Render;
+use PDF::Tags::Render;
 use PDF::API6;
 
 plan 1;
@@ -23,7 +23,7 @@ my Pair:D $doc-ast =
                 "tap is closed, the timer simply stops emitting values to that tap."],
          ];
 
-my PDF::API6 $pdf = PDF::Render.render($doc-ast, :%role-map);
+my PDF::API6 $pdf = PDF::Tags::Render.render($doc-ast, :%role-map);
 $pdf.id = $*PROGRAM.basename.fmt('%-16.16s');
 lives-ok { $pdf.save-as: "t/basic.pdf", :!info };
 

@@ -1,5 +1,5 @@
 use Test;
-use PDF::Render;
+use PDF::Tags::Render;
 use PDF::API6;
 
 plan 2;
@@ -16,6 +16,6 @@ my Pair:D $doc-ast =
          ];
 
 
-lives-ok { PDF::Render.render($doc-ast, :%role-map) }
+lives-ok { PDF::Tags::Render.render($doc-ast, :%role-map) }
 $doc-ast.value.push: (:A["urrgh"]);
-dies-ok { PDF::Render.render($doc-ast, :%role-map) }
+dies-ok { PDF::Tags::Render.render($doc-ast, :%role-map) }

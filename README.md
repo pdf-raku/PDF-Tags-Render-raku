@@ -4,14 +4,13 @@ PDF-Render
 Description
 -----------
 
-A simple PDF::API6 based renderer for an intermediate tagged PDF representation, typically produced
-from Pod, Markdown, or as application output.
+Simple rendering of tagged PDF trees.
 
 Synopsis
 --------
 
 ```raku
-use PDF::Render;
+use PDF::Tags::Render;
 
 my %role-map = (
     'U' => :Span[:TextDecorationType<Underline>],
@@ -33,7 +32,7 @@ my Pair:D $pdf-ast =
            "timer with the appropriate interval each time it is tapped."],
      ];
 
-my PDF::Render $renderer .= new: :%role-map;
+my PDF::Tags::Render $renderer .= new: :%role-map;
 my PDF::API6 $pdf = $renderer.render($pdf-ast);
 $pdf.save-as: "example.pdf";
 ```
