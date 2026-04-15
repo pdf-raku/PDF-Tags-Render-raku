@@ -128,18 +128,19 @@ method merge-batch( % ( :@toc!, :%index!, :$frag, :%info (:$Lang, *%meta), :$pag
     }
 }
 
-method pdf {
+method finish(:$index = True) {
     unless $!finished++ {
         self!paginate()
-            if $!page-numbers ;
+            if $!page-numbers;
+        self!build-index
+            if %!index && $index;
         if @.toc {
             $!pdf.outlines.kids = @.toc;
         }
     }
-    $!pdf;
 }
 
-method build-index {
+method !build-index {
     self.add-toc-entry(%( :Title('Index')), :level(1));
     my %idx := %!index;
     %idx .= &categorize-alphabetically
