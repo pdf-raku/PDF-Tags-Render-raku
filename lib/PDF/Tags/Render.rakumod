@@ -175,6 +175,6 @@ multi method render(::?CLASS:D: PdfASTRoot $xml-ast, Bool :$index = True) {
     my %index = $writer.index;
     my @toc = $writer.toc;
     $.merge-batch: %( :@toc, :%index, :$info);
-    $.build-index if $index && %index;
+    $.finish(:$index);
     $.pdf;
 }
