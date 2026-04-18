@@ -62,7 +62,7 @@ submethod TWEAK(Str:D :$lang = 'en', :$pod, :@fonts, :$stylesheet, :$page-style,
     self!preload-fonts(@fonts)
         if @fonts;
 
-    $!pdf.creator.push: "{self.^name}-{self.^ver//'v0'}";
+    $!pdf.creator.push: "{self.^name}-{self.^ver//'rc0'}";
 
     with $stylesheet {
         # dig out any @page{...} styling from the stylesheet
@@ -79,7 +79,7 @@ submethod TWEAK(Str:D :$lang = 'en', :$pod, :@fonts, :$stylesheet, :$page-style,
     }
 }
 
-method writer(PDF::Content::PageTree:D :$pages = $!pdf.Pages, PDF::Tags::Elem:D :$frag = $!root.Document) {
+method writer(PDF::Content::PageTree:D :$pages = $!pdf.Pages) {
     $pages.media-box = 0, 0, $!width, $!height;
     my $finish = ! $!page-numbers;
     my PDF::Tags::Render::Writer $writer .= new: :%!font-map, :%!role-map, :$pages, :$finish, :$!tag, :$!pdf, :$!contents; #, |c;

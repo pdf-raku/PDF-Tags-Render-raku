@@ -432,7 +432,7 @@ multi method ast2pdf('L', @content, *%atts) {
 }
 
 multi method ast2pdf('LI', @content, *%atts) {
-    my Level $level = min($!level, 5);
+    my Level $level = $!level.&min: 5;
     temp $!indent = $level + $.style.measure(:margin-left) / 10 - 1;
     temp $!padding = $.line-height * 2;
     my $do-float = True;
